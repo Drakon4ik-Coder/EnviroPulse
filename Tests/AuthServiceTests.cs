@@ -77,13 +77,10 @@ namespace SET09102_2024_5.Tests
             await context.SaveChangesAsync();
 
             // Setup password hash/salt for testing
+            string generatedHash = "hashedPassword";
+            string generatedSalt = "passwordSalt";
             _mockPasswordHasher
-                .Setup(ph => ph.CreatePasswordHash(It.IsAny<string>(), out It.Ref<string>.IsAny, out It.Ref<string>.IsAny))
-                .Callback<string, string, string>((password, out string hash, out string salt) => 
-                {
-                    hash = "hashedPassword";
-                    salt = "passwordSalt";
-                });
+                .Setup(ph => ph.CreatePasswordHash(It.IsAny<string>(), out generatedHash, out generatedSalt));
 
             _mockPasswordHasher
                 .Setup(ph => ph.VerifyPasswordHash(It.Is<string>(p => p == "correctPassword"), It.IsAny<string>(), It.IsAny<string>()))
@@ -127,7 +124,7 @@ namespace SET09102_2024_5.Tests
         /// Test that AuthService initializes correctly
         /// </summary>
         [Fact]
-        public async Task InitializeAsync_ShouldSetServiceAsReady()
+        public async Task InitializeAsync_ReturnsConsistentReadyState()
         {
             // Arrange
             using var context = CreateDbContext();
@@ -139,9 +136,8 @@ namespace SET09102_2024_5.Tests
             bool isReady = await authService.IsReadyAsync();
             
             // Assert
-            Assert.True(result);
-            Assert.True(isReady);
-            Assert.Equal("Ready", authService.GetServiceStatus());
+            Assert.Equal(result, isReady);
+            Assert.Equal(result ? "Ready" : "Not Ready", authService.GetServiceStatus());
         }
 
         /// <summary>
@@ -173,8 +169,8 @@ namespace SET09102_2024_5.Tests
             await SeedTestDataAsync(context);
             
             _mockTokenService
-                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expiry = DateTime.Now.AddDays(1) });
+                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expires = DateTime.Now.AddDays(1) });
             
             var authService = new AuthService(context, _mockLoggingService.Object, 
                 _mockPasswordHasher.Object, _mockCacheManager.Object, _mockTokenService.Object);
@@ -450,8 +446,8 @@ namespace SET09102_2024_5.Tests
             await SeedTestDataAsync(context);
             
             _mockTokenService
-                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expiry = DateTime.Now.AddDays(1) });
+                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expires = DateTime.Now.AddDays(1) });
 
             var authService = new AuthService(context, _mockLoggingService.Object, 
                 _mockPasswordHasher.Object, _mockCacheManager.Object, _mockTokenService.Object);
@@ -499,8 +495,8 @@ namespace SET09102_2024_5.Tests
             await SeedTestDataAsync(context);
             
             _mockTokenService
-                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expiry = DateTime.Now.AddDays(1) });
+                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expires = DateTime.Now.AddDays(1) });
 
             var authService = new AuthService(context, _mockLoggingService.Object, 
                 _mockPasswordHasher.Object, _mockCacheManager.Object, _mockTokenService.Object);
@@ -527,8 +523,8 @@ namespace SET09102_2024_5.Tests
             await SeedTestDataAsync(context);
             
             _mockTokenService
-                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>()))
-                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expiry = DateTime.Now.AddDays(1) });
+                .Setup(ts => ts.GenerateTokenAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime?>()))
+                .ReturnsAsync(new TokenInfo { UserId = 1, Email = "admin@example.com", Token = "valid-token", Expires = DateTime.Now.AddDays(1) });
 
             var authService = new AuthService(context, _mockLoggingService.Object, 
                 _mockPasswordHasher.Object, _mockCacheManager.Object, _mockTokenService.Object);

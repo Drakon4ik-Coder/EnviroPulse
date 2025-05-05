@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SET09102_2024_5.Data;
 using SET09102_2024_5.Models;
+using SET09102_2024_5.Tests.Mocks;
 using SET09102_2024_5.ViewModels;
 using Xunit;
 
@@ -12,6 +13,9 @@ namespace SET09102_2024_5.Tests.ViewModels
 {
     public class SensorManagementViewModelFirmwareTests
     {
+        private readonly MockMainThreadService _mainThreadService = new();
+        private readonly MockDialogService _dialogService = new();
+
         private SensorMonitoringContext GetContext()
         {
             var options = new DbContextOptionsBuilder<SensorMonitoringContext>()
@@ -25,17 +29,19 @@ namespace SET09102_2024_5.Tests.ViewModels
         {
             // arrange
             var ctx = GetContext();
-            var vm = new SensorManagementViewModel(ctx);
-            vm.SelectedSensor = new Sensor { SensorId = 1, Measurand = new Measurand() };
-            vm.FirmwareVersion = "";
-            vm.LastUpdateDate = DateTime.Today;
+            var vm = new SensorManagementViewModel(ctx, _mainThreadService, _dialogService);
+            vm.Configuration = new Configuration
+            {
+                SensorId = 1,
+                Orientation = null
+            };
 
             // act
-            vm.ValidateCommand.Execute(nameof(vm.FirmwareVersion));
+            vm.ValidateCommand.Execute(nameof(Configuration.Orientation));
 
             // assert
             Assert.True(vm.HasValidationErrors);
-            Assert.Contains(nameof(vm.FirmwareVersion), vm.ValidationErrors.Keys);
+            Assert.Contains(nameof(Configuration.Orientation), vm.ValidationErrors.Keys);
         }
 
         [Fact]
@@ -43,17 +49,19 @@ namespace SET09102_2024_5.Tests.ViewModels
         {
             // arrange
             var ctx = GetContext();
-            var vm = new SensorManagementViewModel(ctx);
-            vm.SelectedSensor = new Sensor { SensorId = 1, Measurand = new Measurand() };
-            vm.FirmwareVersion = "1.0.0";
-            vm.LastUpdateDate = DateTime.Today.AddDays(1);
+            var vm = new SensorManagementViewModel(ctx, _mainThreadService, _dialogService);
+            vm.Configuration = new Configuration
+            {
+                SensorId = 1,
+                Latitude = 120
+            };
 
             // act
-            vm.ValidateCommand.Execute(nameof(vm.LastUpdateDate));
+            vm.ValidateCommand.Execute(nameof(Configuration.Latitude));
 
             // assert
             Assert.True(vm.HasValidationErrors);
-            Assert.Contains(nameof(vm.LastUpdateDate), vm.ValidationErrors.Keys);
+            Assert.Contains(nameof(Configuration.Latitude), vm.ValidationErrors.Keys);
         }
 
         [Fact]
@@ -61,12 +69,36 @@ namespace SET09102_2024_5.Tests.ViewModels
         {
             // arrange
             var ctx = GetContext();
-            var sensor = new Sensor { SensorId = 42, Measurand = new Measurand() };
+            var sensor = new Sensor
+            {
+                SensorId = 42,
+                SensorType = "Temperature",
+                Status = "Active",
+                Measurand = new Measurand
+                {
+                    MeasurandId = 1,
+                    QuantityName = "Temperature",
+                    QuantityType = "Physical",
+                    Symbol = "T",
+                    Unit = "C"
+                }
+            };
             ctx.Sensors.Add(sensor);
             await ctx.SaveChangesAsync();
 
-            var vm = new SensorManagementViewModel(ctx);
+            var vm = new SensorManagementViewModel(ctx, _mainThreadService, _dialogService);
             vm.SelectedSensor = sensor;
+            vm.Configuration = new Configuration
+            {
+                SensorId = sensor.SensorId,
+                Latitude = 0,
+                Longitude = 0,
+                Altitude = 0,
+                Orientation = 0,
+                MeasurementFrequency = 5,
+                MinThreshold = 0,
+                MaxThreshold = 1
+            };
             vm.FirmwareVersion = "2.1.5";
             vm.LastUpdateDate = DateTime.Today.AddDays(-1);
 

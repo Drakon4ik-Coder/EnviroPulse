@@ -50,7 +50,7 @@ namespace SET09102_2024_5.Tests
         }
 
         // Interface to represent the MainPage functionality we need
-        private interface IMainPage
+        public interface IMainPage
         {
             Task DisplayAlert(string title, string message, string cancel);
             Task<bool> DisplayAlert(string title, string message, string accept, string cancel);

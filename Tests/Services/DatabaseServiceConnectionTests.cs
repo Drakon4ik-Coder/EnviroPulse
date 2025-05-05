@@ -1,110 +1,43 @@
-﻿using System;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using SET09102_2024_5.Data;
-using SET09102_2024_5.Services;
-using Xunit;
-using SET09102_2024_5.Interfaces;
 using Moq;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using SET09102_2024_5.Data;
+using SET09102_2024_5.Interfaces;
+using SET09102_2024_5.Services;
 
 namespace SET09102_2024_5.Tests
 {
-    public class DatabaseServiceTests
+    public class DatabaseServiceConnectionTests
     {
-        private readonly DbContextOptions<SensorMonitoringContext> _options;
-        private readonly IServiceProvider _serviceProvider;
-
-
-        public DatabaseServiceTests()
+        private static DbContextOptions<SensorMonitoringContext> CreateOptions(string databaseName)
         {
-            // Set up a MySQL in-memory database instead of EF Core's built-in InMemory provider
-            _options = new DbContextOptionsBuilder<SensorMonitoringContext>()
-                .UseMySql(
-                    "Server=localhost;Database=test_db_" + Guid.NewGuid().ToString("N") + ";User=root;Password=;",
-                    new MySqlServerVersion(new Version(8, 0, 32)),
-                    mySqlOptions => mySqlOptions.EnableRetryOnFailure()
-                                                .MigrationsAssembly("Migrations")
-                )
-                .EnableSensitiveDataLogging()
-                .EnableDetailedErrors()
+            return new DbContextOptionsBuilder<SensorMonitoringContext>()
+                .UseInMemoryDatabase(databaseName)
                 .Options;
-
-            var services = new ServiceCollection();
-            services.AddSingleton(_options);
-            services.AddDbContext<SensorMonitoringContext>(ServiceLifetime.Transient);
-            services.AddScoped<IDatabaseService, DatabaseService>();
-            services.AddScoped<IDatabaseService>(sp =>
-            {
-                var mockService = new Mock<IDatabaseService>();
-                mockService.Setup(s => s.TestConnectionAsync()).ReturnsAsync(true);
-                mockService.Setup(s => s.InitializeDatabaseAsync()).Returns(Task.CompletedTask);
-                return mockService.Object;
-            });
-
-            _serviceProvider = services.BuildServiceProvider();
-        }
-
-
-        [Fact]
-        public async Task TestConnectionAsync_ShouldReturnTrue_WithInMemoryDatabase()
-        {
-            // Arrange
-            var databaseService = _serviceProvider.GetRequiredService<IDatabaseService>();
-
-            // Act
-            bool canConnect = await databaseService.TestConnectionAsync();
-
-            // Assert
-            Assert.True(canConnect, "Should connect to in-memory database");
         }
 
         [Fact]
-        public async Task InitializeDatabaseAsync_ShouldNotThrow_WithInMemoryDatabase()
+        public async Task InitializeDatabaseAsync_WithInMemoryProvider_CreatesDatabase()
         {
-            // Arrange
-            var databaseService = _serviceProvider.GetRequiredService<IDatabaseService>();
+            var options = CreateOptions($"DbInit_{Guid.NewGuid():N}");
+            var loggingService = new Mock<ILoggingService>();
+            var service = new DatabaseInitializationService(options, loggingService.Object);
 
-            // Act & Assert (no exception should be thrown)
-            await databaseService.InitializeDatabaseAsync();
+            await service.InitializeDatabaseAsync();
+
+            await using var context = new SensorMonitoringContext(options);
+            Assert.True(await context.Database.CanConnectAsync());
         }
 
         [Fact]
-        public void GetLastErrorMessage_WhenNoError_ReturnsEmptyString()
+        public async Task TestConnectionAsync_WithInMemoryProvider_ReturnsFalse()
         {
-            // Arrange
-            using var context = new SensorMonitoringContext(_options);
-            var service = new DatabaseInitializationService(context);
+            var options = CreateOptions($"DbConnection_{Guid.NewGuid():N}");
+            var loggingService = new Mock<ILoggingService>();
+            var service = new DatabaseInitializationService(options, loggingService.Object);
 
-            // Act
-            var result = service.GetLastErrorMessage();
+            var result = await service.TestConnectionAsync();
 
-            // Assert
-            Assert.Equal(string.Empty, result);
-        }
-
-        [Fact]
-        public void GetLastErrorMessage_WhenErrorOccurs_ReturnsErrorMessage()
-        {
-            // Arrange - create a context that will throw an exception
-            var mockContext = new Mock<SensorMonitoringContext>(_options);
-            var mockDatabase = new Mock<DatabaseFacade>(mockContext.Object);
-
-            // Mock context to throw an exception on CanConnectAsync
-            mockContext.Setup(c => c.Database).Returns(mockDatabase.Object);
-            mockDatabase.Setup(d => d.CanConnectAsync(It.IsAny<CancellationToken>()))
-                        .ThrowsAsync(new Exception("error"));
-
-            var service = new DatabaseInitializationService(mockContext.Object);
-
-            // Act - trigger the error by initializing
-            service.InitializeDatabaseAsync().Wait();
-            var result = service.GetLastErrorMessage();
-
-            // Assert
-            Assert.Equal("error", result);
+            Assert.False(result);
         }
     }
 }
