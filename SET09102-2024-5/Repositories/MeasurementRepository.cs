@@ -9,7 +9,7 @@ namespace SET09102_2024_5.Data.Repositories
     {
         private readonly SensorMonitoringContext _ctx;
 
-        public MeasurementRepository(SensorMonitoringContext ctx, IMemoryCache cache)
+        public MeasurementRepository(SensorMonitoringContext ctx, IMemoryCache? cache = null)
             : base(ctx, cache) => _ctx = ctx;
 
         public Task<List<Measurement>> GetSinceAsync(DateTime since)

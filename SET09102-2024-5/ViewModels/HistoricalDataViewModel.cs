@@ -54,13 +54,19 @@ namespace SET09102_2024_5.Features.HistoricalData.ViewModels
 			get => selectedCategory;
 			set
 			{
-				selectedCategory = value;
+                selectedCategory = value;
                 OnPropertyChanged();
 
-                // swap in the right list of parameters
-                ParameterTypes = _paramsByCategory[selectedCategory];
-                // default-pick the first one so SelectedParameter isn’t null
-                SelectedParameter = ParameterTypes.First();
+                if (_paramsByCategory.TryGetValue(selectedCategory, out var parameterTypes))
+                {
+                    ParameterTypes = parameterTypes;
+                    SelectedParameter = ParameterTypes.FirstOrDefault() ?? string.Empty;
+                }
+                else
+                {
+                    ParameterTypes = new List<string>();
+                    SelectedParameter = string.Empty;
+                }
 
                 _ = LoadHistoricalData();
             }
@@ -114,7 +120,7 @@ namespace SET09102_2024_5.Features.HistoricalData.ViewModels
         public async Task LoadHistoricalData()
         {
             if (string.IsNullOrEmpty(SelectedCategory)) return;
-            var results = await _dataService.GetHistoricalData(SelectedCategory, null);
+            var results = await _dataService.GetHistoricalData(SelectedCategory, SelectedSensorSite);
             DataPoints.Clear();
             foreach (var item in results)
                 DataPoints.Add(item);

@@ -8,7 +8,7 @@ namespace SET09102_2024_5.Data.Repositories
     public class SensorRepository : Repository<Sensor>, ISensorRepository
     {
         private readonly SensorMonitoringContext _ctx;
-        public SensorRepository(SensorMonitoringContext ctx, IMemoryCache cache) : base(ctx, cache)
+        public SensorRepository(SensorMonitoringContext ctx, IMemoryCache? cache = null) : base(ctx, cache)
             => _ctx = ctx;
 
         public Task<List<Sensor>> GetAllWithConfigurationAsync() =>

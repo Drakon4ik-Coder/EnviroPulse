@@ -19,7 +19,7 @@ namespace SET09102_2024_5.Services
 {
     public class AuthService : BaseService, IAuthService
     {
-        private readonly SensorMonitoringContextFactory _contextFactory;
+        private readonly SensorMonitoringContext _dbContext;
         private readonly IPasswordHasher _passwordHasher;
         private readonly ICacheManager _cacheManager;
         private readonly ITokenService _tokenService;
@@ -49,7 +49,7 @@ namespace SET09102_2024_5.Services
             ITokenService tokenService)
             : base("Authentication Service", AuthCategory, loggingService)
         {
-            _contextFactory = new SensorMonitoringContextFactory();
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
             _passwordHasher = passwordHasher ?? throw new ArgumentNullException(nameof(passwordHasher));
             _cacheManager = cacheManager ?? throw new ArgumentNullException(nameof(cacheManager));
             _tokenService = tokenService ?? throw new ArgumentNullException(nameof(tokenService));
@@ -141,7 +141,7 @@ namespace SET09102_2024_5.Services
                 }
 
                 // Retrieve the user from database with proper error handling
-                var user = await _contextFactory.CreateDbContext(new string[0]).Users
+                var user = await _dbContext.Users
                     .Include(u => u.Role)
                     .FirstOrDefaultAsync(u => u.UserId == tokenInfo.UserId && u.Email == tokenInfo.Email);
                 
@@ -216,7 +216,7 @@ namespace SET09102_2024_5.Services
             var result = await ServiceOperations.ExecuteAsync<User>(
                 async () =>
                 {
-                    var user = await _contextFactory.CreateDbContext(new string[0]).Users
+                    var user = await _dbContext.Users
                         .Include(u => u.Role)
                         .FirstOrDefaultAsync(u => u.Email == email);
 
@@ -321,8 +321,7 @@ namespace SET09102_2024_5.Services
             var result = await ServiceOperations.ExecuteAsync<bool>(
                 async () =>
                 {
-                    // Create a single context instance to use throughout the method
-                    using var context = _contextFactory.CreateDbContext(new string[0]);
+                    var context = _dbContext;
                     
                     // Check if user already exists
                     if (await context.Users.AnyAsync(u => u.Email == email))
@@ -386,7 +385,7 @@ namespace SET09102_2024_5.Services
             var result = await ServiceOperations.ExecuteAsync<bool>(
                 async () =>
                 {
-                    var user = await _contextFactory.CreateDbContext(new string[0]).Users.FindAsync(userId);
+                    var user = await _dbContext.Users.FindAsync(userId);
                     if (user == null)
                     {
                         _loggingService.Warning($"Password change failed - user not found: {userId}", _serviceCategory);
@@ -403,7 +402,7 @@ namespace SET09102_2024_5.Services
                     user.PasswordHash = passwordHash;
                     user.PasswordSalt = passwordSalt;
 
-                    await _contextFactory.CreateDbContext(new string[0]).SaveChangesAsync();
+                    await _dbContext.SaveChangesAsync();
                     
                     // If this is the current user, we need to update their token
                     if (_currentUser != null && _currentUser.UserId == userId)
@@ -485,7 +484,7 @@ namespace SET09102_2024_5.Services
                         var result = await ServiceOperations.ExecuteAsync<string>(
                             async () =>
                             {
-                                var user = await _contextFactory.CreateDbContext(new string[0]).Users
+                                var user = await _dbContext.Users
                                     .Include(u => u.Role)
                                     .FirstOrDefaultAsync(u => u.UserId == userId);
 
@@ -559,7 +558,7 @@ namespace SET09102_2024_5.Services
                         var result = await ServiceOperations.ExecuteAsync<List<string>>(
                             async () =>
                             {
-                                var user = await _contextFactory.CreateDbContext(new string[0]).Users
+                                var user = await _dbContext.Users
                                     .Include(u => u.Role)
                                     .ThenInclude(r => r.RolePrivileges)
                                     .ThenInclude(rp => rp.AccessPrivilege)

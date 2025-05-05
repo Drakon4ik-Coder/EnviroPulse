@@ -31,7 +31,7 @@ namespace SET09102_2024_5.ViewModels
         private readonly IMainThreadService _mainThreadService;
         private readonly IDialogService _dialogService;
         private readonly INavigationService _navigationService;
-        private readonly SensorMonitoringContextFactory _contextFactory;
+        private readonly SensorMonitoringContext _context;
 
         private ObservableCollection<SensorOperationalModel> _sensors;
         private ObservableCollection<SensorOperationalModel> _allSensors;
@@ -62,7 +62,7 @@ namespace SET09102_2024_5.ViewModels
             IDialogService? dialogService = null,
             INavigationService? navigationService = null)
         {
-            _contextFactory = new SensorMonitoringContextFactory();
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             _mainThreadService = mainThreadService ?? new Services.MainThreadService();
             _dialogService = dialogService ?? new Services.DialogService();
             _navigationService = navigationService;
@@ -223,15 +223,13 @@ namespace SET09102_2024_5.ViewModels
             {
                 IsLoading = true;
 
-                var sensors = await _contextFactory.CreateDbContext(new string[0])
-                    .Sensors
+                var sensors = await _context.Sensors
                     .Include(s => s.Measurand)
                     .AsNoTracking()
                     .ToListAsync();
 
                 // Calculate incident counts for each sensor
-                var incidentCounts = await _contextFactory.CreateDbContext(new string[0])
-                    .Measurements
+                var incidentCounts = await _context.Measurements
                     .GroupBy(m => m.SensorId)
                     .Select(g => new
                     {

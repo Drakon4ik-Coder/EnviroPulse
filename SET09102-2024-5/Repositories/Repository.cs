@@ -35,10 +35,10 @@ namespace SET09102_2024_5.Data.Repositories
         /// </summary>
         /// <param name="context">The database context used for entity operations.</param>
         /// <param name="cache">The memory cache used to store frequently accessed entities.</param>
-        public Repository(SensorMonitoringContext context, IMemoryCache cache)
+        public Repository(SensorMonitoringContext context, IMemoryCache? cache = null)
         {
             _context = context;
-            _cache = cache;
+            _cache = cache ?? new MemoryCache(new MemoryCacheOptions());
         }
 
         /// <summary>
