@@ -410,3 +410,6 @@ Tests/bin
 appsettings.json
 appsettings.test.json
 /Migrations/appsettings.json
+!/SET09102-2024-5/appsettings.json
+!/Tests/appsettings.test.json
+!/Migrations/appsettings.json

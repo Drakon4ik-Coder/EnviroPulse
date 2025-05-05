@@ -2,60 +2,39 @@ name: CI/CD Pipeline for .NET MAUI App
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   build:
-    name: Build and Test
+    name: Build and Test (${{ matrix.target }})
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
-        target: [android, windows]
+        include:
+          - target: android
+            framework: net8.0-android
+          - target: windows
+            framework: net8.0-windows10.0.19041.0
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: "8.0.x"
 
-      - name: Cache .NET Workloads
-        uses: actions/cache@v3
-        with:
-          path: ~/.dotnet
-          key: ${{ runner.os }}-dotnet-workloads-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-dotnet-workloads-
-
-      - name: Install .NET MAUI workloads
-        run: dotnet workload install maui-android maui-ios maui-windows
+      - name: Restore .NET workloads
+        run: dotnet workload restore SET09102-2024-5/SET09102-2024-5.sln
 
       - name: Restore NuGet packages
-        run: dotnet restore
+        run: dotnet restore SET09102-2024-5/SET09102-2024-5.sln
 
-      - name: Build for Android
-        if: ${{ matrix.target == 'android' }}
-        run: |
-          dotnet build SET09102_2024-5/SET09102_2024-5.csproj \
-            --configuration Release \
-            --framework net8.0-android
-
-      - name: Build for Windows
-        if: ${{ matrix.target == 'windows' }}
-        run: |
-          dotnet build SET09102_2024-5/SET09102_2024-5.csproj \
-            --configuration Release \
-            --framework net8.0-windows10.0.19041.0
+      - name: Build app
+        run: dotnet build SET09102-2024-5/SET09102-2024-5.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore
 
       - name: Run tests
-        run: |
-          dotnet test Tests/Tests.csproj \
-            --configuration Release \
-            --verbosity normal
+        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal
