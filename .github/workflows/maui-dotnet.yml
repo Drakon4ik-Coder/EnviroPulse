@@ -6,8 +6,67 @@ on:
   pull_request:
 
 jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
+
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
+      - name: Restore test dependencies
+        run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
+
+      - name: Run tests
+        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
+
+  build-pr:
+    name: Build App (windows)
+    if: github.event_name == 'pull_request'
+    needs: test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
+
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
+
+      - name: Restore app dependencies
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=net8.0-windows10.0.19041.0 -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
+      - name: Build app
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework net8.0-windows10.0.19041.0 --no-restore -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
   build:
-    name: Build and Test (${{ matrix.target }})
+    name: Build App (${{ matrix.target }})
+    if: github.event_name != 'pull_request'
+    needs: test
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -30,18 +89,16 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
 
       - name: Confirm .NET SDK
         run: dotnet --version
 
       - name: Restore .NET workloads
         run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
-
-      - name: Restore test dependencies
-        run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
-
-      - name: Run tests
-        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
 
       - name: Restore app dependencies
         run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=${{ matrix.framework }} ${{ matrix.restore_args }}
