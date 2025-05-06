@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     name: Run Tests
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
@@ -26,6 +26,9 @@ jobs:
       - name: Confirm .NET SDK
         run: dotnet --version
 
+      - name: Restore .NET workloads
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
+
       - name: Restore test dependencies
         run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
 
@@ -35,7 +38,6 @@ jobs:
   build-pr:
     name: Build App (windows)
     if: github.event_name == 'pull_request'
-    needs: test
     runs-on: windows-latest
 
     steps:
@@ -66,7 +68,6 @@ jobs:
   build:
     name: Build App (${{ matrix.target }})
     if: github.event_name != 'pull_request'
-    needs: test
     runs-on: windows-latest
     strategy:
       fail-fast: false
