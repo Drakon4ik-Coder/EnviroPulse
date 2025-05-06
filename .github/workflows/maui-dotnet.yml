@@ -8,7 +8,7 @@ on:
 jobs:
   test:
     name: Run Tests
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -25,9 +25,6 @@ jobs:
 
       - name: Confirm .NET SDK
         run: dotnet --version
-
-      - name: Restore .NET workloads
-        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
 
       - name: Restore test dependencies
         run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false

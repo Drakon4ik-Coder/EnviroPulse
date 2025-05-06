@@ -42,6 +42,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="Interfaces\**\*.cs" />
+		<Compile Remove="Models\**\*.cs" />
+		<Compile Remove="Data\**\*.cs" />
+		<Compile Remove="Repositories\**\*.cs" />
+		<Compile Remove="Services\**\*.cs" />
+		<Compile Remove="ViewModels\**\*.cs" />
+		<Compile Remove="Converters\**\*.cs" />
+		<Compile Include="Services\ViewLifecycleManager.cs" />
+		<Compile Include="Services\ViewRegistration.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\EnviroPulse.Core\EnviroPulse.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
 

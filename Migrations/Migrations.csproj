@@ -29,7 +29,7 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="..\EnviroPulse\EnviroPulse.csproj" />
+		<ProjectReference Include="..\EnviroPulse.Core\EnviroPulse.Core.csproj" />
 	</ItemGroup>
 
 </Project>

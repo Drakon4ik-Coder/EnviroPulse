@@ -1,7 +1,5 @@
-using Microsoft.Maui.Controls;
 using SET09102_2024_5.Interfaces;
 using SET09102_2024_5.Services;
-using SET09102_2024_5.Views;
 
 namespace SET09102_2024_5.Tests.Mocks
 {
@@ -45,7 +43,7 @@ namespace SET09102_2024_5.Tests.Mocks
 
         public Task NavigateToUserRoleManagementAsync() => NavigateToAsync(RouteConstants.UserRoleManagementPage);
 
-        public Task NavigateToViewAsync<TView>() where TView : ViewBase
+        public Task NavigateToViewAsync<TView>() where TView : class
         {
             ViewHistory.Add(typeof(TView));
             RouteHistory.Add(typeof(TView).Name);
@@ -67,7 +65,7 @@ namespace SET09102_2024_5.Tests.Mocks
         public Task<bool> CanNavigateToRouteAsync(string route) => Task.FromResult(true);
 
         // Legacy helpers retained for older tests that use page types or parameters directly.
-        public Task NavigateToAsync<T>(object? parameter = null) where T : Page
+        public Task NavigateToAsync<T>(object? parameter = null) where T : class
         {
             ViewHistory.Add(typeof(T));
             RouteHistory.Add(typeof(T).Name);
