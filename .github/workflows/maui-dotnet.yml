@@ -27,14 +27,17 @@ jobs:
         with:
           dotnet-version: "8.0.x"
 
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
       - name: Restore .NET workloads
-        run: dotnet workload restore EnviroPulse/EnviroPulse.sln
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
 
       - name: Restore NuGet packages
-        run: dotnet restore EnviroPulse/EnviroPulse.sln
+        run: dotnet restore EnviroPulse/EnviroPulse.sln -p:CheckEolWorkloads=false
 
       - name: Build app
-        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore -p:CheckEolWorkloads=false
 
       - name: Run tests
-        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal
+        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
