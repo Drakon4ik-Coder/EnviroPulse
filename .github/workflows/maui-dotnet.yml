@@ -33,7 +33,7 @@ jobs:
         run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
 
   build-pr:
-    name: Build App (windows)
+    name: Build PR App (windows)
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
 
@@ -59,11 +59,14 @@ jobs:
       - name: Restore app dependencies
         run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=net8.0-windows10.0.19041.0 -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
 
+      - name: Restore shared core dependencies
+        run: dotnet restore EnviroPulse.Core/EnviroPulse.Core.csproj -p:CheckEolWorkloads=false
+
       - name: Build app
         run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework net8.0-windows10.0.19041.0 --no-restore -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
 
   build:
-    name: Build App (${{ matrix.target }})
+    name: Build App Matrix (${{ matrix.target }})
     if: github.event_name != 'pull_request'
     runs-on: windows-latest
     strategy:
@@ -100,6 +103,9 @@ jobs:
 
       - name: Restore app dependencies
         run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=${{ matrix.framework }} ${{ matrix.restore_args }}
+
+      - name: Restore shared core dependencies
+        run: dotnet restore EnviroPulse.Core/EnviroPulse.Core.csproj -p:CheckEolWorkloads=false
 
       - name: Build app
         run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore ${{ matrix.build_args }}

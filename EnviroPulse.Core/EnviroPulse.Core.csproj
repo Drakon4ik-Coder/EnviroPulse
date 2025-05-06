@@ -8,6 +8,7 @@
 		<AssemblyName>EnviroPulse.Core</AssemblyName>
 		<RootNamespace>SET09102_2024_5</RootNamespace>
 		<MauiVersion>8.0.100</MauiVersion>
+		<TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == '' and $([MSBuild]::IsOSPlatform('windows'))">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
