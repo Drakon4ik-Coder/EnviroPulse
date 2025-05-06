@@ -3,9 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.ApplicationModel;
-using Microsoft.Extensions.DependencyInjection;
-using SET09102_2024_5.Views;
-using System.Collections.Generic;
 using SET09102_2024_5.Interfaces;
 
 namespace SET09102_2024_5.Services
@@ -16,18 +13,14 @@ namespace SET09102_2024_5.Services
     public class NavigationService : BaseService, INavigationService
     {
         private readonly IAuthService _authService;
-        private readonly IServiceProvider _serviceProvider;
         private const string NavCategory = "Navigation";
-        
-        // Keep track of registered routes locally since Shell.Routes is not accessible
-        private readonly HashSet<string> _registeredRoutes = new HashSet<string>();
 
         /// <summary>
         /// Initializes a new instance of the NavigationService class
         /// </summary>
         /// <param name="authService">Authentication service for permission checks</param>
         /// <param name="loggingService">Logging service for diagnostic information</param>
-        /// <param name="serviceProvider">Service provider for dependency resolution</param>
+        /// <param name="serviceProvider">Service provider required by existing DI registrations</param>
         /// <exception cref="ArgumentNullException">Thrown when any parameter is null</exception>
         public NavigationService(
             IAuthService authService, 
@@ -36,31 +29,14 @@ namespace SET09102_2024_5.Services
             : base("Navigation Service", NavCategory, loggingService)
         {
             _authService = authService ?? throw new ArgumentNullException(nameof(authService));
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            ArgumentNullException.ThrowIfNull(serviceProvider);
         }
         
         /// <summary>
-        /// Initializes the navigation service by registering all common routes
+        /// Initializes the navigation service
         /// </summary>
         protected override async Task InitializeInternalAsync()
         {
-            // Initialize the view registration system
-            ViewRegistration.Initialize();
-            
-            // Pre-register common routes to avoid dynamic registration during navigation
-            foreach (var route in RouteConstants.AllRoutes)
-            {
-                try
-                {
-                    var viewType = ViewRegistration.GetViewTypeForRoute(route);
-                    RegisterRouteIfNeeded(route, viewType);
-                }
-                catch (Exception ex)
-                {
-                    _loggingService.Warning($"Could not pre-register route {route}: {ex.Message}", _serviceCategory);
-                }
-            }
-            
             await Task.CompletedTask;
         }
 
@@ -159,7 +135,7 @@ namespace SET09102_2024_5.Services
         /// </summary>
         /// <typeparam name="TView">The type of the view to navigate to</typeparam>
         /// <returns>A task representing the asynchronous operation</returns>
-        public Task NavigateToViewAsync<TView>() where TView : ViewBase
+        public Task NavigateToViewAsync<TView>() where TView : class
         {
             // Convert from view type to route name
             string viewName = typeof(TView).Name;
@@ -264,20 +240,6 @@ namespace SET09102_2024_5.Services
                     string normalizedRoute = NormalizeRoute(route);
                     _loggingService.Debug($"Normalized route: {normalizedRoute}", _serviceCategory);
                     
-                    // Register route if needed
-                    if (!_registeredRoutes.Contains(route))
-                    {
-                        try
-                        {
-                            Type viewType = ViewRegistration.GetViewTypeForRoute(route);
-                            RegisterRouteIfNeeded(route, viewType);
-                        }
-                        catch (Exception ex)
-                        {
-                            _loggingService.Warning($"Could not register route dynamically: {ex.Message}", _serviceCategory);
-                        }
-                    }
-                    
                     await Shell.Current.GoToAsync(normalizedRoute);
                     _loggingService.Info($"Successfully navigated to: {route}", _serviceCategory);
                 }
@@ -335,27 +297,6 @@ namespace SET09102_2024_5.Services
                     await Shell.Current.DisplayAlert("Navigation Error", 
                         "An error occurred while navigating. Please try again.", "OK");
                 });
-            }
-        }
-
-        // Helper to register new routes for navigation
-        private void RegisterRouteIfNeeded(string route, Type viewType)
-        {
-            if (string.IsNullOrEmpty(route) || viewType == null)
-                return;
-
-            try
-            {
-                if (!_registeredRoutes.Contains(route))
-                {
-                    _loggingService.Debug($"Registering route: {route} -> {viewType.Name}", _serviceCategory);
-                    Routing.RegisterRoute(route, viewType);
-                    _registeredRoutes.Add(route);
-                }
-            }
-            catch (Exception ex)
-            {
-                _loggingService.Error($"Failed to register route: {route}", ex, _serviceCategory);
             }
         }
 

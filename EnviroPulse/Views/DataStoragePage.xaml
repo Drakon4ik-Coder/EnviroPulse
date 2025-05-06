@@ -2,7 +2,7 @@
 <views:ViewBase
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:conv="clr-namespace:SET09102_2024_5.Converters"
+    xmlns:conv="clr-namespace:SET09102_2024_5.Converters;assembly=EnviroPulse.Core"
     xmlns:views="clr-namespace:SET09102_2024_5.Views"
     x:Class="SET09102_2024_5.Views.DataStoragePage"
     Title="Data Storage">

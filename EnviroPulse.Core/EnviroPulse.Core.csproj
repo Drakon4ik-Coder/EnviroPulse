@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+		<AssemblyName>EnviroPulse.Core</AssemblyName>
+		<RootNamespace>SET09102_2024_5</RootNamespace>
+		<MauiVersion>8.0.100</MauiVersion>
+		<TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == '' and $([MSBuild]::IsOSPlatform('windows'))">10.0.17763.0</TargetPlatformMinVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.104.2" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="Mapsui.Maui" Version="4.1.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
+		<PackageReference Include="MySqlBackup.NET" Version="2.3.9" />
+		<PackageReference Include="NetTopologySuite" Version="2.6.0" />
+		<PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0-preview.3.efcore.9.0.0" />
+		<PackageReference Include="SkiaSharp" Version="2.88.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\EnviroPulse\Interfaces\**\*.cs" Link="Interfaces\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\Models\**\*.cs" Link="Models\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\Data\**\*.cs" Link="Data\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\Repositories\**\*.cs" Link="Repositories\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\Services\**\*.cs"
+		         Exclude="..\EnviroPulse\Services\ViewLifecycleManager.cs;..\EnviroPulse\Services\ViewRegistration.cs"
+		         Link="Services\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\ViewModels\**\*.cs" Link="ViewModels\%(RecursiveDir)%(Filename)%(Extension)" />
+		<Compile Include="..\EnviroPulse\Converters\**\*.cs" Link="Converters\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="..\EnviroPulse\appsettings.json" Link="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+		<EmbeddedResource Include="..\EnviroPulse\DigiCertGlobalRootG2.crt.pem" Link="DigiCertGlobalRootG2.crt.pem">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</EmbeddedResource>
+	</ItemGroup>
+
+</Project>

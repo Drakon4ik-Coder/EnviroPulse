@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <views:ViewBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
                 xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-                xmlns:vm="clr-namespace:SET09102_2024_5.ViewModels"
-                xmlns:models="clr-namespace:SET09102_2024_5.Models"
-                xmlns:converters="clr-namespace:SET09102_2024_5.Converters"
+                xmlns:vm="clr-namespace:SET09102_2024_5.ViewModels;assembly=EnviroPulse.Core"
+                xmlns:models="clr-namespace:SET09102_2024_5.Models;assembly=EnviroPulse.Core"
+                xmlns:converters="clr-namespace:SET09102_2024_5.Converters;assembly=EnviroPulse.Core"
                 xmlns:helpers="clr-namespace:SET09102_2024_5.Helpers"
                 xmlns:controls="clr-namespace:SET09102_2024_5.Views.Controls"
                 xmlns:views="clr-namespace:SET09102_2024_5.Views"

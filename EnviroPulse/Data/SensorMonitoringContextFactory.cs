@@ -32,11 +32,7 @@ namespace SET09102_2024_5.Data
                 ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
             // Handle SSL certificate
-            if (!string.IsNullOrEmpty(MauiProgram.CertPath))
-            {
-                conn = conn.Replace("SslCa=DigiCertGlobalRootG2.crt.pem;", $"SslCa={MauiProgram.CertPath};");
-            }
-            else
+            if (conn.Contains("SslCa=DigiCertGlobalRootG2.crt.pem;", StringComparison.Ordinal))
             {
                 try
                 {

@@ -1,6 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.Maui.Controls;
-using SET09102_2024_5.Views;
 
 namespace SET09102_2024_5.Interfaces
 {
@@ -52,7 +50,7 @@ namespace SET09102_2024_5.Interfaces
         /// <summary>
         /// Navigate to a view by its type
         /// </summary>
-        Task NavigateToViewAsync<TView>() where TView : ViewBase;
+        Task NavigateToViewAsync<TView>() where TView : class;
         
         /// <summary>
         /// Enable the flyout menu
@@ -70,4 +68,3 @@ namespace SET09102_2024_5.Interfaces
         Task<bool> CanNavigateToRouteAsync(string route);
     }
 }
-

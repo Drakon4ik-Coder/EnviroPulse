@@ -1,6 +1,8 @@
-    using SET09102_2024_5.Data;
+using System.Linq;
+using SET09102_2024_5.Data;
 using SET09102_2024_5.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Threading.Tasks;
 
@@ -19,7 +21,9 @@ namespace SET09102_2024_5.Services
         {
             _dbContextOptions = dbContextOptions;
             _loggingService = loggingService;
-            ConnectionString = MauiProgram.ConnectionString;
+            ConnectionString = _dbContextOptions.Extensions
+                .OfType<RelationalOptionsExtension>()
+                .FirstOrDefault()?.ConnectionString ?? string.Empty;
         }
 
         public async Task InitializeDatabaseAsync()

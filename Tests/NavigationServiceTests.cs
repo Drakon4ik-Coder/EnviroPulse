@@ -1,13 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.ApplicationModel;
 using Moq;
 using SET09102_2024_5.Interfaces;
 using SET09102_2024_5.Models;
 using SET09102_2024_5.Services;
-using SET09102_2024_5.Views;
 using Xunit;
 
 namespace SET09102_2024_5.Tests
@@ -263,12 +260,12 @@ namespace SET09102_2024_5.Tests
                 .Returns(Task.CompletedTask);
 
             // Act - we need to use a class that derives from ViewBase
-            await navigationServiceMock.Object.NavigateToViewAsync<TestViewBase>();
+            await navigationServiceMock.Object.NavigateToViewAsync<TestView>();
 
             // Assert
             // Check that the navigateToAsync was called with the correct route name
             navigationServiceMock.Verify(
-                x => x.NavigateToAsync("TestViewBase"),
+                x => x.NavigateToAsync("TestView"),
                 Times.Once);
         }
 
@@ -349,7 +346,7 @@ namespace SET09102_2024_5.Tests
         }
         
         // Test helper class that inherits from ViewBase for testing NavigateToViewAsync
-        private class TestViewBase : ViewBase
+        private class TestView
         {
         }
     }

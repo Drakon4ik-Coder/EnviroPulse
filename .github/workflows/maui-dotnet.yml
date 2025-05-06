@@ -6,17 +6,9 @@ on:
   pull_request:
 
 jobs:
-  build:
-    name: Build and Test (${{ matrix.target }})
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - target: android
-            framework: net8.0-android
-          - target: windows
-            framework: net8.0-windows10.0.19041.0
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -26,15 +18,115 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
 
-      - name: Restore .NET workloads
-        run: dotnet workload restore EnviroPulse/EnviroPulse.sln
+      - name: Confirm .NET SDK
+        run: dotnet --version
 
-      - name: Restore NuGet packages
-        run: dotnet restore EnviroPulse/EnviroPulse.sln
-
-      - name: Build app
-        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore
+      - name: Restore test dependencies
+        run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
 
       - name: Run tests
-        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal
+        run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
+
+  build-pr:
+    name: Build PR App (windows)
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
+
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
+
+      - name: Restore app dependencies
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=net8.0-windows10.0.19041.0 -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
+      - name: Restore shared core dependencies
+        run: dotnet restore EnviroPulse.Core/EnviroPulse.Core.csproj -p:CheckEolWorkloads=false
+
+      - name: Build app
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework net8.0-windows10.0.19041.0 --no-restore -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
+  build-windows:
+    name: Build App (windows)
+    if: github.event_name == 'push'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
+
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
+
+      - name: Restore app dependencies
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=net8.0-windows10.0.19041.0 -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
+      - name: Restore shared core dependencies
+        run: dotnet restore EnviroPulse.Core/EnviroPulse.Core.csproj -p:CheckEolWorkloads=false
+
+      - name: Build app
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework net8.0-windows10.0.19041.0 --no-restore -r win-x64 -p:CheckEolWorkloads=false -p:PublishReadyToRun=false
+
+  build-android:
+    name: Build App (android, main only)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+          cache: true
+          cache-dependency-path: |
+            global.json
+            **/*.csproj
+
+      - name: Confirm .NET SDK
+        run: dotnet --version
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
+
+      - name: Restore app dependencies
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=net8.0-android -p:CheckEolWorkloads=false
+
+      - name: Restore shared core dependencies
+        run: dotnet restore EnviroPulse.Core/EnviroPulse.Core.csproj -p:CheckEolWorkloads=false
+
+      - name: Build app
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework net8.0-android --no-restore -p:CheckEolWorkloads=false
