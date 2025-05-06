@@ -300,27 +300,6 @@ namespace SET09102_2024_5.Services
             }
         }
 
-        // Helper to register new routes for navigation
-        private void RegisterRouteIfNeeded(string route, Type viewType)
-        {
-            if (string.IsNullOrEmpty(route) || viewType == null)
-                return;
-
-            try
-            {
-                if (!_registeredRoutes.Contains(route))
-                {
-                    _loggingService.Debug($"Registering route: {route} -> {viewType.Name}", _serviceCategory);
-                    Routing.RegisterRoute(route, viewType);
-                    _registeredRoutes.Add(route);
-                }
-            }
-            catch (Exception ex)
-            {
-                _loggingService.Error($"Failed to register route: {route}", ex, _serviceCategory);
-            }
-        }
-
         // Handle navigation errors with fallback strategy
         private async Task HandleNavigationError(string route, Exception ex)
         {
