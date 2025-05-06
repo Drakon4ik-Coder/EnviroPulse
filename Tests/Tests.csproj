@@ -27,7 +27,7 @@
 
 	<ItemGroup>
 		<Using Include="Xunit" />
-		<ProjectReference Include="..\SET09102-2024-5\SET09102-2024-5.csproj" />
+		<ProjectReference Include="..\EnviroPulse\EnviroPulse.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -10,7 +10,7 @@ namespace SET09102_2024_5.Migrations
     {
         public static async Task Main(string[] args)
         {
-            Console.WriteLine("SET09102 Sensor Monitoring - Database Migrations Tool");
+            Console.WriteLine("EnviroPulse - Database Migrations Tool");
             Console.WriteLine("===================================================");
 
             try

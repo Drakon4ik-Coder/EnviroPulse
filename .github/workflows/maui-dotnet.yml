@@ -28,13 +28,13 @@ jobs:
           dotnet-version: "8.0.x"
 
       - name: Restore .NET workloads
-        run: dotnet workload restore SET09102-2024-5/SET09102-2024-5.sln
+        run: dotnet workload restore EnviroPulse/EnviroPulse.sln
 
       - name: Restore NuGet packages
-        run: dotnet restore SET09102-2024-5/SET09102-2024-5.sln
+        run: dotnet restore EnviroPulse/EnviroPulse.sln
 
       - name: Build app
-        run: dotnet build SET09102-2024-5/SET09102-2024-5.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore
 
       - name: Run tests
         run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal
