@@ -15,8 +15,12 @@ jobs:
         include:
           - target: android
             framework: net8.0-android
+            restore_args: -p:CheckEolWorkloads=false
+            build_args: -p:CheckEolWorkloads=false
           - target: windows
             framework: net8.0-windows10.0.19041.0
+            restore_args: -r win-x64 -p:CheckEolWorkloads=false
+            build_args: -r win-x64 -p:CheckEolWorkloads=false
 
     steps:
       - name: Checkout code
@@ -33,11 +37,14 @@ jobs:
       - name: Restore .NET workloads
         run: dotnet workload restore EnviroPulse/EnviroPulse.csproj
 
-      - name: Restore NuGet packages
-        run: dotnet restore EnviroPulse/EnviroPulse.sln -p:CheckEolWorkloads=false
+      - name: Restore test dependencies
+        run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
+
+      - name: Restore app dependencies
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj --framework ${{ matrix.framework }} ${{ matrix.restore_args }}
 
       - name: Build app
-        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore -p:CheckEolWorkloads=false
+        run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore ${{ matrix.build_args }}
 
       - name: Run tests
         run: dotnet test Tests/Tests.csproj --configuration Release --framework net8.0 --no-restore --verbosity normal -p:CheckEolWorkloads=false
