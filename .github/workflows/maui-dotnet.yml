@@ -41,7 +41,7 @@ jobs:
         run: dotnet restore Tests/Tests.csproj -p:CheckEolWorkloads=false
 
       - name: Restore app dependencies
-        run: dotnet restore EnviroPulse/EnviroPulse.csproj --framework ${{ matrix.framework }} ${{ matrix.restore_args }}
+        run: dotnet restore EnviroPulse/EnviroPulse.csproj -p:TargetFramework=${{ matrix.framework }} ${{ matrix.restore_args }}
 
       - name: Build app
         run: dotnet build EnviroPulse/EnviroPulse.csproj --configuration Release --framework ${{ matrix.framework }} --no-restore ${{ matrix.build_args }}
